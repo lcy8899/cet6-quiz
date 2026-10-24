@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>六级词汇答题 · CET-6 Vocabulary Quiz</title>
+<style>
+:root{
+  --primary:#2563eb; --primary-dark:#1e40af; --primary-light:#dbeafe;
+  --green:#16a34a; --green-bg:#f0fdf4; --red:#dc2626; --red-bg:#fef2f2;
+  --amber:#d97706; --amber-bg:#fffbeb;
+  --text:#1e293b; --muted:#64748b; --line:#e2e8f0; --bg:#f1f5f9; --card:#ffffff;
+  --radius:14px; --shadow:0 1px 3px rgba(15,23,42,.08),0 4px 16px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#app{max-width:760px;margin:0 auto;padding:0 16px 48px}
+
+/* ── 顶部导航 ── */
+header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#1e40af,#2563eb 60%,#3b82f6);color:#fff;margin:0 -16px;padding:18px 24px 0;box-shadow:var(--shadow)}
+header .brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+header h1{font-size:22px;font-weight:700;letter-spacing:.5px}
+header .sub{font-size:12px;opacity:.85}
+nav{display:flex;gap:4px;margin-top:12px}
+nav button{border:none;background:transparent;color:rgba(255,255,255,.8);font-size:14px;padding:9px 16px;cursor:pointer;border-radius:10px 10px 0 0;transition:.15s}
+nav button:hover{color:#fff;background:rgba(255,255,255,.12)}
+nav button.active{color:var(--primary-dark);background:var(--bg);font-weight:600}
+
+/* ── 通用卡片/按钮 ── */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-top:18px}
+.btn{border:none;cursor:pointer;font-size:15px;font-weight:600;padding:12px 22px;border-radius:10px;transition:.15s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-outline{background:#fff;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-outline:hover{background:var(--primary-light)}
+.btn-ghost{background:#f1f5f9;color:var(--muted)}
+.btn-ghost:hover{background:#e2e8f0}
+.btn-danger{background:#fff;color:var(--red);border:1.5px solid #fca5a5}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-lg{font-size:17px;padding:15px 30px;width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── 首页 ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 8px;text-align:center}
+.stat .num{font-size:24px;font-weight:700;color:var(--primary)}
+.stat .lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.progress-wrap{margin:16px 2px 2px}
+.progress-bar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.progress-bar>div{height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:99px;transition:width .4s}
+.progress-note{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.field select{padding:10px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;background:#fff;color:var(--text)}
+.checks{grid-column:1/-1;display:flex;gap:18px;flex-wrap:wrap;margin-top:2px}
+.check{display:flex;align-items:center;gap:7px;font-size:14px;cursor:pointer;user-select:none}
+.check input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
+.home-actions{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+.home-actions .btn{flex:1;min-width:130px}
+.src-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.7}
+
+/* ── 答题页 ── */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:13px;color:var(--muted)}
+.quiz-top .live{display:flex;gap:12px}
+.live .ok{color:var(--green);font-weight:600}
+.live .no{color:var(--red);font-weight:600}
+.live .rate{font-weight:600}
+.quiz-progress{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:8px}
+.quiz-progress>div{height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:99px;transition:width .3s}
+.word-card{text-align:center;padding:30px 22px 22px}
+.word-core{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--amber);border-radius:99px;padding:2px 10px;margin-bottom:8px;letter-spacing:1px}
+.word-main{font-family:Georgia,"Times New Roman",serif;font-size:46px;font-weight:700;letter-spacing:1px;line-height:1.2;cursor:pointer}
+.word-main:hover{color:var(--primary)}
+.word-phone{color:var(--muted);font-size:16px;margin-top:6px;font-family:Georgia,serif}
+.word-speak{background:none;border:none;cursor:pointer;font-size:18px;margin-left:6px;vertical-align:middle;opacity:.7}
+.word-speak:hover{opacity:1}
+.q-hint{font-size:12px;color:var(--muted);margin-top:12px}
+.options{display:flex;flex-direction:column;gap:11px;margin-top:16px}
+.opt{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15.5px;cursor:pointer;transition:.13s;text-align:left;line-height:1.45}
+.opt:hover:not(:disabled){border-color:var(--primary);background:#f8faff;transform:translateY(-1px)}
+.opt:disabled{cursor:default}
+.opt .tag{flex:none;width:26px;height:26px;border-radius:8px;background:#eef2f7;color:var(--muted);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.opt.correct{border-color:var(--green);background:var(--green-bg)}
+.opt.correct .tag{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--red-bg)}
+.opt.wrong .tag{background:var(--red);color:#fff}
+.opt.dim{opacity:.55}
+.example{margin-top:16px;background:#f8fafc;border-left:4px solid var(--primary);border-radius:8px;padding:12px 16px;font-size:14px;line-height:1.7;color:#334155}
+.example .en{font-family:Georgia,serif}
+.example .cn{color:var(--muted);margin-top:3px}
+.quiz-foot{display:flex;gap:12px;margin-top:16px}
+.quiz-foot .btn{flex:1}
+.btn-quit{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:10px;text-align:center;width:100%}
+
+/* ── 结果页 ── */
+.result-head{text-align:center;padding:26px 22px}
+.score-ring{position:relative;width:150px;height:150px;margin:0 auto}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .val b{font-size:34px;color:var(--primary)}
+.score-ring .val span{font-size:12px;color:var(--muted)}
+.result-title{font-size:20px;font-weight:700;margin-top:14px}
+.result-sub{color:var(--muted);font-size:13.5px;margin-top:6px}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.result-grid .stat{box-shadow:none;background:#f8fafc}
+.wrong-block h3{font-size:15px;margin:4px 2px 10px;color:var(--red)}
+.wrong-item{display:flex;gap:12px;padding:10px 4px;border-bottom:1px dashed var(--line);font-size:14px;align-items:baseline}
+.wrong-item:last-child{border-bottom:none}
+.wrong-item .w{font-family:Georgia,serif;font-weight:700;font-size:15.5px;flex:none;min-width:110px}
+.wrong-item .t{color:#475569;line-height:1.5}
+
+/* ── 列表页（错题本/词库） ── */
+.list-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.list-toolbar input[type=search]{flex:1;min-width:180px;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px}
+.list-toolbar input[type=search]:focus{outline:none;border-color:var(--primary)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:99px;font-size:13px;padding:6px 14px;cursor:pointer;transition:.13s}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+.list-meta{font-size:12.5px;color:var(--muted);margin:12px 2px 0}
+.word-row{display:flex;gap:12px;padding:11px 4px;border-bottom:1px dashed var(--line);align-items:baseline}
+.word-row:last-child{border-bottom:none}
+.word-row .w{font-family:Georgia,serif;font-weight:700;font-size:16px;flex:none;width:130px}
+.word-row .w small{color:var(--muted);font-weight:400;font-size:12px;margin-left:4px}
+.word-row .t{color:#475569;font-size:14px;line-height:1.5;flex:1}
+.badge{flex:none;font-size:11px;border-radius:99px;padding:2px 9px;font-weight:600}
+.badge.core{background:var(--amber-bg);color:var(--amber)}
+.badge.mastered{background:var(--green-bg);color:var(--green)}
+.badge.wrong{background:var(--red-bg);color:var(--red)}
+.badge.learned{background:var(--primary-light);color:var(--primary)}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px;line-height:2}
+
+/* ── 页面切换 ── */
+.page{display:none}
+.page.active{display:block;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+@media (max-width:560px){
+  .stats-grid,.result-grid{grid-template-columns:repeat(2,1fr)}
+  .set-grid{grid-template-columns:1fr}
+  .word-main{font-size:38px}
+  .word-row .w{width:104px}
+  header{padding:14px 18px 0}
+  .opt{font-size:14.5px;padding:12px 13px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <h1>六级词汇答题</h1>
+      <span class="sub" id="brandSub"></span>
+    </div>
+    <nav>
+      <button data-page="home" class="active">🏠 首页</button>
+      <button data-page="wrong">📕 错题本</button>
+      <button data-page="browse">📚 词库</button>
+    </nav>
+  </header>
+
+  <!-- ═══ 首页 ═══ -->
+  <section id="page-home" class="page active">
+    <div class="stats-grid" style="margin-top:18px">
+      <div class="stat"><div class="num" id="stTotal">0</div><div class="lbl">总词汇</div></div>
+      <div class="stat"><div class="num" id="stLearned">0</div><div class="lbl">已练习</div></div>
+      <div class="stat"><div class="num" id="stMastered">0</div><div class="lbl">已掌握</div></div>
+      <div class="stat"><div class="num" id="stWrong">0</div><div class="lbl">错题</div></div>
+    </div>
+    <div class="card">
+      <div class="progress-wrap">
+        <div class="progress-bar"><div id="homeProgress" style="width:0%"></div></div>
+        <div class="progress-note" id="homeProgressNote"></div>
+      </div>
+      <div class="set-grid" style="margin-top:16px">
+        <div class="field">
+          <label>词库范围</label>
+          <select id="setRange">
+            <option value="all">全部词汇（3991 词）</option>
+            <option value="core" selected>真题核心词（1228 词）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>每组题量</label>
+          <select id="setCount">
+            <option value="10">10 题</option>
+            <option value="20" selected>20 题</option>
+            <option value="50">50 题</option>
+            <option value="100">100 题</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>出题顺序</label>
+          <select id="setOrder">
+            <option value="random" selected>随机</option>
+            <option value="alpha">按字母顺序（系统学习）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div class="checks" style="margin:0">
+            <label class="check"><input type="checkbox" id="setFresh"> 只练未掌握的词</label>
+            <label class="check"><input type="checkbox" id="setAuto" checked> 答题后自动下一题</label>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" id="btnStart" style="margin-top:18px">🎯 开始答题</button>
+      <div class="home-actions">
+        <button class="btn btn-outline" id="btnWrongDrill">📕 练错题</button>
+        <button class="btn btn-ghost" id="btnBrowse">📚 浏览词库</button>
+      </div>
+      <p class="src-note">💡 功能说明：显示英文单词，从 4 个选项中选出正确的<b>中文释义</b>；连续答对 2 次记为「已掌握」，答错的词自动进入错题本，重练答对后自动移出。点击单词可听发音（需浏览器支持）。<br>数据来源：GitHub 开源词库 kajweb/dict（有道考神《六级真题核心词》1228 词 + 新东方《六级词汇》2345 词 + 《六级英语词汇大纲》2078 词，合并去重）。学习进度保存在本机浏览器中。</p>
+    </div>
+  </section>
+
+  <!-- ═══ 答题页 ═══ -->
+  <section id="page-quiz" class="page">
+    <div class="quiz-top">
+      <span id="qNum">第 1 / 20 题</span>
+      <div class="live">
+        <span class="ok">✓ <b id="qOk">0</b></span>
+        <span class="no">✗ <b id="qNo">0</b></span>
+        <span class="rate">正确率 <b id="qRate">--</b></span>
+      </div>
+    </div>
+    <div class="quiz-progress"><div id="qBar" style="width:5%"></div></div>
+    <div class="card word-card">
+      <div id="qCore" class="word-core" style="display:none">真题核心</div>
+      <div class="word-main"><span id="qWord"></span><button class="word-speak" id="qSpeak" title="朗读单词">🔊</button></div>
+      <div class="word-phone" id="qPhone"></div>
+      <div class="q-hint">选出正确的中文释义（可按键盘 1-4 作答）</div>
+    </div>
+    <div class="options" id="qOptions"></div>
+    <div id="qExample" class="example" style="display:none"></div>
+    <div class="quiz-foot">
+      <button class="btn btn-primary" id="btnNext" disabled>下一题 ⏎</button>
+    </div>
+    <button class="btn-quit" id="btnQuit">提前结束，查看本次成绩</button>
+  </section>
+
+  <!-- ═══ 结果页 ═══ -->
+  <section id="page-result" class="page">
+    <div class="card result-head">
+      <div class="score-ring">
+        <svg width="150" height="150">
+          <circle cx="75" cy="75" r="64" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+          <circle id="ringFill" cx="75" cy="75" r="64" fill="none" stroke="#2563eb" stroke-width="12"
+                  stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402" style="transition:stroke-dashoffset .8s"/>
+        </svg>
+        <div class="val"><b id="rRate">0%</b><span>正确率</span></div>
+      </div>
+      <div class="result-title" id="rTitle"></div>
+      <div class="result-sub" id="rSub"></div>
+      <div class="result-grid">
+        <div class="stat"><div class="num" id="rTotal">0</div><div class="lbl">答题数</div></div>
+        <div class="stat"><div class="num" style="color:var(--green)" id="rOk">0</div><div class="lbl">答对</div></div>
+        <div class="stat"><div class="num" style="color:var(--red)" id="rNo">0</div><div class="lbl">答错</div></div>
+        <div class="stat"><div class="num" id="rTime">0:00</div><div class="lbl">用时</div></div>
+      </div>
+    </div>
+    <div class="card wrong-block" id="rWrongBlock" style="display:none">
+      <h3>📕 本次答错的词（点击 🔊 可听发音）</h3>
+      <div id="rWrongList"></div>
+    </div>
+    <div class="home-actions">
+      <button class="btn btn-primary" id="btnRetryWrong">📕 重练本次错题</button>
+      <button class="btn btn-outline" id="btnAgain">🔄 再来一组</button>
+      <button class="btn btn-ghost" id="btnHome">🏠 返回首页</button>
+    </div>
+  </section>
+
+  <!-- ═══ 错题本 ═══ -->
+  <section id="page-wrong" class="page">
+    <div class="card">
+      <div class="list-toolbar">
+        <input type="search" id="wrongSearch" placeholder="搜索单词或释义…">
+        <button class="btn btn-primary" id="btnWrongStart">📕 练错题</button>
+        <button class="btn btn-danger" id="btnWrongClear">清空</button>
+      </div>
+      <div class="list-meta" id="wrongMeta"></div>
+      <div id="wrongList" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ═══ 词库浏览 ═══ -->
+  <section id="page-browse" class="page">
+    <div class="card">
+      <div class="list-toolbar">
+        <input type="search" id="browseSearch" placeholder="搜索单词或中文释义，如 abandon / 抛弃…">
+      </div>
+      <div class="chips" style="margin-top:12px" id="browseChips">
+        <button class="chip active" data-f="all">全部</button>
+        <button class="chip" data-f="core">真题核心</button>
+        <button class="chip" data-f="learned">已练习</button>
+        <button class="chip" data-f="mastered">已掌握</button>
+        <button class="chip" data-f="wrong">错题</button>
+      </div>
+      <div class="list-meta" id="browseMeta"></div>
+      <div id="browseList" style="margin-top:8px"></div>
+    </div>
+  </section>
+</div>
+
+<script src="data.js"></script>
+<script>
+'use strict';
+/* ════════ 数据与持久化 ════════ */
+const WORDS = (typeof CET6_WORDS !== 'undefined') ? CET6_WORDS : null;
+const byWord = new Map();           // word(lower) -> entry
+const STATE_KEY = 'cet6-quiz-v1';
+
+let state = { progress:{}, wrong:{}, settings:{range:'core',count:20,order:'random',fresh:false,auto:true} };
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STATE_KEY);
+    if(raw){ const s = JSON.parse(raw); state.progress = s.progress||{}; state.wrong = s.wrong||{}; Object.assign(state.settings, s.settings||{}); }
+  }catch(e){}
+}
+function saveState(){ try{ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }catch(e){} }
+function prog(w){ return state.progress[w.toLowerCase()]; }
+
+function updateProgress(word, ok){
+  const key = word.toLowerCase();
+  const p = state.progress[key] || (state.progress[key] = {ok:0,err:0,streak:0,mastered:false});
+  if(ok){
+    p.ok++; p.streak++;
+    if(p.streak >= 2) p.mastered = true;
+    if(state.wrong[key]){ // 错题重练答对 → 移出错题本
+      if(--state.wrong[key] <= 0) delete state.wrong[key];
+    }
+  }else{
+    p.err++; p.streak = 0; p.mastered = false;
+  }
+  saveState();
+}
+function addWrong(word){
+  const key = word.toLowerCase();
+  state.wrong[key] = (state.wrong[key]||0) + 1;
+  saveState();
+}
+
+/* ════════ 工具 ════════ */
+const $ = id => document.getElementById(id);
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+function speak(text){
+  try{
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.9;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* ════════ 页面切换 ════════ */
+let curPage = 'home';
+function showPage(name){
+  curPage = name;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+name).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+  window.scrollTo({top:0});
+  if(name==='home') renderHome();
+  if(name==='wrong') renderWrong();
+  if(name==='browse') renderBrowse();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+
+/* ════════ 首页 ════════ */
+function renderHome(){
+  if(!WORDS) return;
+  const total = WORDS.length, core = WORDS.filter(w=>w.c).length;
+  const learned = Object.keys(state.progress).length;
+  const mastered = Object.values(state.progress).filter(p=>p.mastered).length;
+  const wrongN = Object.keys(state.wrong).length;
+  $('stTotal').textContent = total;
+  $('stLearned').textContent = learned;
+  $('stMastered').textContent = mastered;
+  $('stWrong').textContent = wrongN;
+  $('homeProgress').style.width = (mastered/total*100).toFixed(2)+'%';
+  $('homeProgressNote').textContent = `已掌握 ${mastered} / ${total}（其中真题核心词 ${core} 个）`;
+  $('brandSub').textContent = `共 ${total} 词 · 真题核心 ${core} 词`;
+}
+function readSettings(){
+  state.settings = {
+    range: $('setRange').value,
+    count: +$('setCount').value,
+    order: $('setOrder').value,
+    fresh: $('setFresh').checked,
+    auto: $('setAuto').checked,
+  };
+  saveState();
+}
+function applySettingsToUI(){
+  const s = state.settings;
+  $('setRange').value = s.range; $('setCount').value = String(s.count);
+  $('setOrder').value = s.order; $('setFresh').checked = s.fresh; $('setAuto').checked = s.auto;
+}
+
+/* ════════ 答题核心 ════════ */
+let session = null;   // {list, idx, ok, no, start, wrongWords:[], answered, questions}
+let autoTimer = null;
+
+function buildPool(){
+  let pool = state.settings.range === 'core' ? WORDS.filter(w=>w.c) : WORDS.slice();
+  if(state.settings.fresh){
+    const fresh = pool.filter(w=>!(prog(w.w)&&prog(w.w).mastered));
+    if(fresh.length) pool = fresh;
+  }
+  return pool;
+}
+function pickDistractors(entry, pool){
+  const seen = new Set([entry.t]);
+  const out = [];
+  const tryFrom = arr => {
+    for(const c of shuffle(arr.slice())){
+      if(out.length >= 3) break;
+      if(!c.t || seen.has(c.t)) continue;
+      seen.add(c.t); out.push(c.t);
+    }
+  };
+  if(Math.random() < 0.6){ // 60% 概率用同首字母词作干扰项，提高辨析难度
+    const letter = entry.w[0].toLowerCase();
+    tryFrom(pool.filter(w=>w.w[0].toLowerCase()===letter));
+  }
+  tryFrom(pool);
+  tryFrom(WORDS);
+  return out;
+}
+function startQuiz(customList){
+  readSettings();
+  let list;
+  if(customList && customList.length){
+    list = customList.slice();
+    shuffle(list);
+    if(list.length > 200) list = list.slice(0,200); // 错题过多时每组最多 200 题
+  }else{
+    let pool = buildPool();
+    if(!pool.length){
+      alert('该范围内没有未掌握的词了，太棒了！可以取消勾选「只练未掌握的词」继续练习。');
+      return;
+    }
+    if(state.settings.order === 'alpha'){
+      pool = pool.slice().sort((a,b)=>a.w.localeCompare(b.w));
+      if(state.settings.fresh){
+        const n = Math.min(state.settings.count, pool.length);
+        list = pool.slice(0, n);           // 顺序模式：从最靠前的未掌握词开始
+      }else{
+        // 顺序模式且不筛未掌握：从上次学到的位置继续
+        let start = 0;
+        const learnedIdx = Math.max(0, ...pool.map((w,i)=>(prog(w.w)&&prog(w.w).ok>0)?i:-1));
+        start = (learnedIdx + 1) % pool.length;
+        const n = Math.min(state.settings.count, pool.length);
+        list = [];
+        for(let i=0;i<n;i++) list.push(pool[(start+i)%pool.length]);
+      }
+    }else{
+      shuffle(pool);
+      list = pool.slice(0, Math.min(state.settings.count, pool.length));
+    }
+  }
+  session = { list, idx:0, ok:0, no:0, start:Date.now(), wrongWords:[], questions:[] };
+  for(const entry of list){
+    const opts = shuffle([entry.t, ...pickDistractors(entry, WORDS)]);
+    session.questions.push({ entry, options:opts, correctIdx:opts.indexOf(entry.t) });
+  }
+  showPage('quiz');
+  renderQuestion();
+}
+function renderQuestion(){
+  clearTimeout(autoTimer);
+  const q = session.questions[session.idx];
+  $('qNum').textContent = `第 ${session.idx+1} / ${session.list.length} 题`;
+  $('qBar').style.width = (session.idx/session.list.length*100).toFixed(1)+'%';
+  $('qCore').style.display = q.entry.c ? 'inline-block' : 'none';
+  $('qWord').textContent = q.entry.w;
+  $('qPhone').textContent = q.entry.p ? '/'+q.entry.p+'/' : '';
+  $('qExample').style.display = 'none';
+  $('btnNext').disabled = true;
+  $('btnNext').textContent = (session.idx === session.list.length-1) ? '查看成绩 ⏎' : '下一题 ⏎';
+
+  const box = $('qOptions'); box.innerHTML = '';
+  q.options.forEach((t,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt'; b.type = 'button';
+    b.innerHTML = `<span class="tag">${'ABCD'[i]}</span><span>${esc(t)}</span>`;
+    b.onclick = ()=>answer(i);
+    box.appendChild(b);
+  });
+}
+function answer(i){
+  if(!session || session.answered) return;
+  session.answered = true;
+  const q = session.questions[session.idx];
+  const right = i === q.correctIdx;
+
+  document.querySelectorAll('#qOptions .opt').forEach((b,j)=>{
+    b.disabled = true;
+    if(j === q.correctIdx) b.classList.add('correct');
+    else if(j === i) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+
+  if(right){ session.ok++; }
+  else{
+    session.no++;
+    session.wrongWords.push(q.entry);
+    addWrong(q.entry.w);
+  }
+  updateProgress(q.entry.w, right);
+  $('qOk').textContent = session.ok;
+  $('qNo').textContent = session.no;
+  $('qRate').textContent = Math.round(session.ok/(session.ok+session.no)*100) + '%';
+
+  if(q.entry.e){
+    const ex = $('qExample');
+    ex.style.display = 'block';
+    ex.innerHTML = `<div class="en">📖 ${esc(q.entry.e[0])}</div><div class="cn">${esc(q.entry.e[1])}</div>`;
+  }
+  speak(q.entry.w);
+  $('btnNext').disabled = false;
+
+  if(state.settings.auto){
+    const delay = right ? 1400 : 4200;
+    autoTimer = setTimeout(()=>next(), delay);
+  }
+}
+function next(){
+  if(!session || !session.answered) return;
+  clearTimeout(autoTimer);
+  session.answered = false;
+  session.idx++;
+  if(session.idx >= session.list.length){ finish(); return; }
+  renderQuestion();
+}
+function finish(){
+  clearTimeout(autoTimer);
+  const total = session.ok + session.no;
+  const rate = total ? Math.round(session.ok/total*100) : 0;
+  const dur = Math.round((Date.now()-session.start)/1000);
+  $('rRate').textContent = rate + '%';
+  $('ringFill').style.strokeDashoffset = 402 - 402*rate/100;
+  $('rTotal').textContent = total;
+  $('rOk').textContent = session.ok;
+  $('rNo').textContent = session.no;
+  $('rTime').textContent = Math.floor(dur/60) + ':' + String(dur%60).padStart(2,'0');
+  $('rTitle').textContent = rate >= 90 ? '🏆 优秀！词汇掌握得很扎实' : rate >= 70 ? '👍 不错，继续加油' : '💪 别灰心，错题再练一遍就记住了';
+  $('rSub').textContent = `用时 ${$('rTime').textContent}　·　答错 ${session.no} 词${session.no ? '（已加入错题本）' : ''}`;
+
+  const blk = $('rWrongBlock'); const listBox = $('rWrongList');
+  if(session.wrongWords.length){
+    blk.style.display = 'block'; listBox.innerHTML = '';
+    session.wrongWords.forEach(e=>{
+      const row = document.createElement('div');
+      row.className = 'wrong-item';
+      row.innerHTML = `<div class="w">${esc(e.w)}${e.p?` <small style="color:#94a3b8">/${esc(e.p)}/</small>`:''} <button class="word-speak" title="朗读">🔊</button></div><div class="t">${esc(e.t)}</div>`;
+      row.querySelector('button').onclick = ()=>speak(e.w);
+      listBox.appendChild(row);
+    });
+  }else blk.style.display = 'none';
+
+  const lastSession = session;
+  $('btnRetryWrong').disabled = !lastSession.wrongWords.length;
+  showPage('result');
+}
+
+/* ════════ 错题本 ════════ */
+function renderWrong(){
+  const keys = Object.keys(state.wrong).sort((a,b)=>state.wrong[b]-state.wrong[a]);
+  const kw = $('wrongSearch').value.trim().toLowerCase();
+  const shown = keys.filter(k=>{
+    if(!kw) return true;
+    const e = byWord.get(k);
+    return e && (e.w.toLowerCase().includes(kw) || e.t.includes(kw));
+  });
+  $('wrongMeta').textContent = keys.length ? `共 ${keys.length} 个错词，答对一次自动移出` : '';
+  const box = $('wrongList');
+  if(!keys.length){ box.innerHTML = '<div class="empty">🎉 错题本是空的！<br>去答一组题，答错的词会自动出现在这里。</div>'; return; }
+  box.innerHTML = '';
+  shown.slice(0,300).forEach(k=>{
+    const e = byWord.get(k); if(!e) return;
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    row.innerHTML = `<div class="w">${esc(e.w)}<small>/${esc(e.p||'')}/</small></div>
+      <div class="t">${esc(e.t)}</div>
+      <span class="badge wrong">错 ${state.wrong[k]} 次</span>`;
+    box.appendChild(row);
+  });
+  if(!shown.length) box.innerHTML = '<div class="empty">没有匹配的错词</div>';
+  $('btnWrongStart').disabled = !keys.length;
+  $('btnWrongClear').disabled = !keys.length;
+}
+
+/* ════════ 词库浏览 ════════ */
+let browseFilter = 'all';
+function renderBrowse(){
+  const kw = $('browseSearch').value.trim().toLowerCase();
+  let list = WORDS;
+  if(browseFilter === 'core') list = list.filter(w=>w.c);
+  else if(browseFilter === 'learned') list = list.filter(w=>prog(w.w));
+  else if(browseFilter === 'mastered') list = list.filter(w=>prog(w.w)&&prog(w.w).mastered);
+  else if(browseFilter === 'wrong') list = list.filter(w=>state.wrong[w.w.toLowerCase()]);
+  if(kw) list = list.filter(w=>w.w.toLowerCase().includes(kw) || (kw.length>=2 && w.t.includes(kw)) );
+  $('browseMeta').textContent = `共 ${list.length} 个词${list.length>200?'，显示前 200 个（可缩小搜索范围）':''}`;
+  const box = $('browseList'); box.innerHTML = '';
+  list.slice(0,200).forEach(e=>{
+    const p = prog(e.w);
+    const badge = state.wrong[e.w.toLowerCase()] ? '<span class="badge wrong">错题</span>'
+      : p && p.mastered ? '<span class="badge mastered">已掌握</span>'
+      : p ? '<span class="badge learned">已练习</span>'
+      : e.c ? '<span class="badge core">核心</span>' : '';
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    row.innerHTML = `<div class="w">${esc(e.w)}<small>/${esc(e.p||'')}/</small></div>
+      <div class="t">${esc(e.t)}${e.e?`<br><span style="color:#94a3b8;font-size:12.5px">${esc(e.e[0])} ${esc(e.e[1])}</span>`:''}</div>
+      ${badge}`;
+    box.appendChild(row);
+  });
+  if(!list.length) box.innerHTML = '<div class="empty">没有匹配的词汇</div>';
+}
+
+/* ════════ 事件绑定 ════════ */
+$('btnStart').onclick = ()=>startQuiz();
+$('btnNext').onclick = next;
+$('btnQuit').onclick = ()=>{ if(session && (session.ok+session.no)>0) finish(); else showPage('home'); };
+$('btnAgain').onclick = ()=>startQuiz();
+$('btnRetryWrong').onclick = ()=>{
+  if(!session || !session.wrongWords.length) return;
+  startQuiz(session.wrongWords.map(e=>byWord.get(e.w.toLowerCase())).filter(Boolean));
+};
+$('btnHome').onclick = ()=>showPage('home');
+$('btnBrowse').onclick = ()=>showPage('browse');
+$('btnWrongDrill').onclick = ()=>{
+  const keys = Object.keys(state.wrong);
+  if(!keys.length){ alert('错题本是空的，先去答一组题吧！'); return; }
+  startQuiz(keys.map(k=>byWord.get(k)).filter(Boolean));
+};
+$('btnWrongStart').onclick = $('btnWrongDrill').onclick;
+$('btnWrongClear').onclick = ()=>{
+  if(confirm('确定清空错题本吗？此操作不可恢复。')){
+    state.wrong = {}; saveState(); renderWrong();
+  }
+};
+$('qSpeak').onclick = ()=>{ const q = session && session.questions[session.idx]; if(q) speak(q.entry.w); };
+$('wrongSearch').oninput = renderWrong;
+$('browseSearch').oninput = renderBrowse;
+document.querySelectorAll('#browseChips .chip').forEach(c=>{
+  c.onclick = ()=>{
+    document.querySelectorAll('#browseChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    browseFilter = c.dataset.f;
+    renderBrowse();
+  };
+});
+
+document.addEventListener('keydown', e=>{
+  if(curPage !== 'quiz' || !session) return;
+  if(e.key >= '1' && e.key <= '4'){
+    const i = +e.key - 1;
+    if(!session.answered) answer(i);
+  }else if((e.key === 'Enter' || e.key === ' ') && session.answered){
+    e.preventDefault(); next();
+  }
+});
+
+/* ════════ 初始化 ════════ */
+(function init(){
+  if(!WORDS){
+    document.body.innerHTML = '<div style="padding:60px 30px;text-align:center;color:#dc2626;font-size:15px;line-height:2">⚠️ 词汇数据 data.js 加载失败<br>请确保 data.js 与 index.html 放在同一个文件夹中。</div>';
+    return;
+  }
+  WORDS.forEach(w=>byWord.set(w.w.toLowerCase(), w));
+  loadState();
+  applySettingsToUI();
+  renderHome();
+})();
+</script>
+</body>
+</html>
